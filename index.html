@@ -1,77 +1,27 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <style>
-  html, body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background: #000; /* optional */
-  }
-
-  #unity-container {
-    position: fixed;
-    inset: 0; /* top:0; right:0; bottom:0; left:0 */
-    width: 100%;
-    height: 100%;
-  }
-
-  #unity-canvas {
-    width: 100% !important;
-    height: 100% !important;
-    display: block;
-  }
-
-  /* NEW: full-screen loader overlay */
-  #unity-loading-bar {
-    position: fixed;
-    inset: 0;
-    display: flex;              /* center the lottie */
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,1);  /* solid black; change to 0.8 if you want */
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 700ms ease;
-    z-index: 9999;
-  }
-
-  /* NEW: visible state */
-  #unity-loading-bar.is-visible {
-    opacity: 1;
-    pointer-events: all;
-  }
-
-  /* NEW: fade-out state */
-  #unity-loading-bar.is-fading-out {
-    opacity: 0;
-    pointer-events: none;
-  }
-</style>
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity Web Player | Test</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-
-    
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-        <div id="unity-loading-bar">
-            <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.6.2/dist/dotlottie-wc.js" type="module"></script>
-            <dotlottie-wc
-                    src="https://lottie.host/e30d96e7-247a-4fb1-b567-5122d45afd90/Np1BeHZbzt.lottie"
-                    style="width:300px;height:300px"
-                    autoplay
-                    loop>
-            </dotlottie-wc>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
         </div>
       </div>
       <div id="unity-warning"> </div>
+      <div id="unity-footer">
+        <div id="unity-logo-title-footer"></div>
+        <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">Test</div>
+      </div>
     </div>
     <script>
       var canvas = document.querySelector("#unity-canvas");
@@ -154,34 +104,30 @@
 
       } else {
         // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
+        canvas.style.width = "960px";
+        canvas.style.height = "600px";
       }
 
-      const loadingBar = document.querySelector("#unity-loading-bar");
+      document.querySelector("#unity-loading-bar").style.display = "block";
 
-      // Show overlay (fade in)
-      requestAnimationFrame(() => {
-        loadingBar.classList.add("is-visible");
-      });
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
-        createUnityInstance(canvas, config).then((unityInstance) => {
-          // Fade out overlay
-          loadingBar.classList.add("is-fading-out");
-          loadingBar.classList.remove("is-visible");
+        createUnityInstance(canvas, config, (progress) => {
+          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+              }).then((unityInstance) => {
+                document.querySelector("#unity-loading-bar").style.display = "none";
+                document.querySelector("#unity-fullscreen-button").onclick = () => {
+                  unityInstance.SetFullscreen(1);
+                };
 
-          // After fade completes, remove overlay from DOM (optional but clean)
-          setTimeout(() => {
-            loadingBar.remove();
-          }, 800); // slightly longer than CSS transition
-        }).catch((message) => {
-          alert(message);
-        });
-      };
+              }).catch((message) => {
+                alert(message);
+              });
+            };
 
       document.body.appendChild(script);
+
     </script>
   </body>
 </html>
