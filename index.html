@@ -22,6 +22,41 @@
     height: 100% !important;
     display: block;
   }
+
+  /* NEW: full-screen loader overlay */
+  #unity-loading-bar {
+    position: fixed;
+    inset: 0;
+    display: flex;              /* center the lottie */
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,1);  /* solid black; change to 0.8 if you want */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 700ms ease;
+    z-index: 9999;
+  }
+
+  /* NEW: visible state */
+  #unity-loading-bar.is-visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* NEW: fade-out state */
+  #unity-loading-bar.is-fading-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #unity-canvas {
+    opacity: 0;
+    transition: opacity 500ms ease;
+  }
+  #unity-canvas.is-ready {
+    opacity: 1;
+  }
+  
 </style>
   <head>
     <meta charset="utf-8">
@@ -33,7 +68,7 @@
   <body>
     <div id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-        <div id="unity-loading-bar" style="display:none;">
+        <div id="unity-loading-bar">
             <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.6.2/dist/dotlottie-wc.js" type="module"></script>
             <dotlottie-wc
                     src="https://lottie.host/e30d96e7-247a-4fb1-b567-5122d45afd90/Np1BeHZbzt.lottie"
@@ -130,20 +165,30 @@
         canvas.style.height = "100%";
       }
 
-      document.querySelector("#unity-loading-bar").style.display = "block";
+      const loadingBar = document.querySelector("#unity-loading-bar");
+
+      // Show overlay (fade in)
+      loadingBar.classList.add("is-visible");
 
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
-          createUnityInstance(canvas, config).then((unityInstance) => {
-                document.querySelector("#unity-loading-bar").style.display = "none";
-              }).catch((message) => {
-                alert(message);
-              });
-            };
+        createUnityInstance(canvas, config).then((unityInstance) => {
+          // Fade out overlay
+          canvas.classList.add("is-ready");
+          loadingBar.classList.add("is-fading-out");
+          loadingBar.classList.remove("is-visible");
+
+          // After fade completes, remove overlay from DOM (optional but clean)
+          setTimeout(() => {
+            loadingBar.remove();
+          }, 800); // slightly longer than CSS transition
+        }).catch((message) => {
+          alert(message);
+        });
+      };
 
       document.body.appendChild(script);
-
     </script>
   </body>
 </html>
