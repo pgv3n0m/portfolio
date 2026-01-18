@@ -105,12 +105,15 @@
         canvas.style.width = "100%";
         canvas.style.height = "100%";
       }
-      
+
+      document.querySelector("#unity-loading-bar").style.display = "block";
+
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
               }).then((unityInstance) => {
+                document.querySelector("#unity-loading-bar").style.display = "none";
               }).catch((message) => {
                 alert(message);
               });
