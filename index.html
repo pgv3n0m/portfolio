@@ -48,15 +48,6 @@
     opacity: 0;
     pointer-events: none;
   }
-
-  #unity-canvas {
-    opacity: 0;
-    transition: opacity 500ms ease;
-  }
-  #unity-canvas.is-ready {
-    opacity: 1;
-  }
-  
 </style>
   <head>
     <meta charset="utf-8">
@@ -175,7 +166,6 @@
       script.onload = () => {
         createUnityInstance(canvas, config).then((unityInstance) => {
           // Fade out overlay
-          canvas.classList.add("is-ready");
           loadingBar.classList.add("is-fading-out");
           loadingBar.classList.remove("is-visible");
 
